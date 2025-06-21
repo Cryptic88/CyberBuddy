@@ -31,6 +31,7 @@ namespace POE_Cybersecurity_Chatbot
                 {
                     string emotionResponse = sentimentResponses[emotion];
 
+
                     // Check for a topic keyword in the same sentence
                     foreach (var topic in topics)
                     {
