@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using POE_CyberBuddy;
 
 namespace POE_Cybersecurity_Chatbot
 {
@@ -14,6 +15,8 @@ namespace POE_Cybersecurity_Chatbot
         private TipsManager tipManager = new TipsManager();
         private SentimentManager sentimentManager = new SentimentManager();
         private ConversationPart2 keywordHandler;
+        private TaskManager taskManager = new TaskManager();
+        private TaskItem pendingTask;
 
         private string currentTopic;
 
@@ -24,7 +27,7 @@ namespace POE_Cybersecurity_Chatbot
         } //Variable to track the current topic of conversation.
         public string ShowWelcomeMessage(string userName) =>
             $"Welcome {userName}! You can select a wide range of questions or form your own questions with keywords.\n" +
-            "You can also view all commands and keywords by typing 'list'.\n";
+            "You can also view all commands and keywords by clicking the 'Commands' button in the top right corner.\n";
         public string GetCommandList() =>
             "Here are all the commands and keywords you can try:\n" +
             "- like to learn [add favorite topic]\n" +
@@ -44,6 +47,7 @@ namespace POE_Cybersecurity_Chatbot
 
         public string StartConversation(string userInput, string userName)
         {
+
             if (!string.IsNullOrEmpty(memory.FavoriteTopic) && new Random().Next(0, 5) == 0)
             {
                 return $"Cyber Buddy: Just a reminder — since you're interested in {memory.FavoriteTopic}, you can ask about it any time using keywords like 'tips' or 'advice'.";
@@ -69,9 +73,6 @@ namespace POE_Cybersecurity_Chatbot
 
             switch (userInput.ToLower()) // (W3schools, 2025)
             {
-                case "list":
-                    return GetCommandList();
-
                 case "how are you":
                     return $"Cyber Buddy: I'm just a bunch of code resembling a Cyber Security Chatbot, but I'm functioning well! Thanks for asking, {userName}.";
 

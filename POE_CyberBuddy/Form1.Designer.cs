@@ -14,6 +14,7 @@ namespace POE_CyberBuddy
         private Button btnSend;
         private Label lblLoggedIn;
         private Button btnCommands;
+        private Button btnAddTask;
 
         /// <summary>
         ///  Clean up any resources being used.
@@ -35,12 +36,14 @@ namespace POE_CyberBuddy
             btnSend = new Button();
             lblLoggedIn = new Label();
             btnCommands = new Button();
+            btnAddTask = new Button();
+            btnStartQuiz = new Button();
             SuspendLayout();
             // 
             // rtbOutput
             // 
             rtbOutput.BackColor = SystemColors.ActiveCaptionText;
-            rtbOutput.Font = new Font("Consolas", 12F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            rtbOutput.Font = new Font("Consolas", 10.8F, FontStyle.Regular, GraphicsUnit.Point, 0);
             rtbOutput.ForeColor = Color.Cyan;
             rtbOutput.Location = new Point(12, 45);
             rtbOutput.Name = "rtbOutput";
@@ -84,23 +87,48 @@ namespace POE_CyberBuddy
             btnCommands.BackColor = Color.PaleTurquoise;
             btnCommands.Cursor = Cursors.Hand;
             btnCommands.Font = new Font("Consolas", 10.2F, FontStyle.Regular, GraphicsUnit.Point, 0);
-            btnCommands.Location = new Point(12, 419);
+            btnCommands.Location = new Point(694, 10);
             btnCommands.Name = "btnCommands";
             btnCommands.Size = new Size(94, 29);
             btnCommands.TabIndex = 4;
             btnCommands.Text = "Commands";
             btnCommands.UseVisualStyleBackColor = false;
             // 
+            // btnAddTask
+            // 
+            btnAddTask.BackColor = Color.PaleTurquoise;
+            btnAddTask.Font = new Font("Consolas", 10.2F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            btnAddTask.Location = new Point(15, 419);
+            btnAddTask.Name = "btnAddTask";
+            btnAddTask.Size = new Size(94, 29);
+            btnAddTask.TabIndex = 5;
+            btnAddTask.Text = "Add Task";
+            btnAddTask.UseVisualStyleBackColor = false;
+            btnAddTask.Click += BtnAddTask_Click;
+            // 
+            // btnStartQuiz
+            // 
+            btnStartQuiz.BackColor = Color.PaleTurquoise;
+            btnStartQuiz.Location = new Point(126, 419);
+            btnStartQuiz.Name = "btnStartQuiz";
+            btnStartQuiz.Size = new Size(94, 29);
+            btnStartQuiz.TabIndex = 6;
+            btnStartQuiz.Text = "Quiz";
+            btnStartQuiz.UseVisualStyleBackColor = false;
+            btnStartQuiz.Click += btnStartQuiz_Click;
+            // 
             // Form1
             // 
             AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(800, 450);
+            Controls.Add(btnStartQuiz);
             Controls.Add(btnCommands);
             Controls.Add(lblLoggedIn);
             Controls.Add(btnSend);
             Controls.Add(txtInput);
             Controls.Add(rtbOutput);
+            Controls.Add(btnAddTask);
             Name = "Form1";
             Text = "Form1";
             Load += Form1_Load;
@@ -108,5 +136,7 @@ namespace POE_CyberBuddy
             PerformLayout();
         }
         #endregion
+
+        private Button btnStartQuiz;
     }
 }

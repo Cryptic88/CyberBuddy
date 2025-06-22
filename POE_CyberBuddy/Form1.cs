@@ -11,6 +11,9 @@ namespace POE_CyberBuddy
     {
         private Conversation chatbot = new Conversation();
         private ASCII_Effects asciiArt = new ASCII_Effects();
+        private TaskManager taskManager = new TaskManager();
+        private QuizManager quizManager = new QuizManager();
+        private bool isInQuiz = false;
         private string userName = "";
 
         public Form1()
@@ -91,6 +94,88 @@ namespace POE_CyberBuddy
             if (string.IsNullOrEmpty(input))
                 return;
 
+            if (isInQuiz)
+            {
+                HandleQuizResponse(input);
+                return;
+            }
+
+            if (input.Equals("list tasks", StringComparison.OrdinalIgnoreCase))
+            {
+                var allTasks = taskManager.GetAllTasks();
+                if (allTasks.Count == 0)
+                {
+                    string reply = "Cyber Buddy: You have no tasks.";
+                    rtbOutput.AppendText(reply + Environment.NewLine);
+                    asciiArt.Speak(reply);
+                }
+                else
+                {
+                    string replyHeader = "Cyber Buddy: Here are your tasks:";
+                    rtbOutput.AppendText(replyHeader + Environment.NewLine);
+                    asciiArt.Speak(replyHeader);
+                    foreach (var t in allTasks)
+                    {
+                        rtbOutput.AppendText(t.ToString() + Environment.NewLine);
+                        asciiArt.Speak(t.ToString());
+                    }
+                }
+                ScrollToBottom();
+                txtInput.Clear();
+                return;
+            }
+
+            if (input.StartsWith("complete task", StringComparison.OrdinalIgnoreCase))
+            {
+                var title = input.Substring("complete task".Length).Trim();
+                if (string.IsNullOrEmpty(title))
+                {
+                    string reply = "Cyber Buddy: Please provide the title of the task you want to complete.";
+                    rtbOutput.AppendText(reply + Environment.NewLine);
+                    asciiArt.Speak(reply);
+                }
+                else if (taskManager.CompleteTask(title))
+                {
+                    string reply = $"Cyber Buddy: Marked task \"{title}\" as completed.";
+                    rtbOutput.AppendText(reply + Environment.NewLine);
+                    asciiArt.Speak(reply);
+                }
+                else
+                {
+                    string reply = $"Cyber Buddy: Couldn't find a task named \"{title}\".";
+                    rtbOutput.AppendText(reply + Environment.NewLine);
+                    asciiArt.Speak(reply);
+                }
+                ScrollToBottom();
+                txtInput.Clear();
+                return;
+            }
+
+            if (input.StartsWith("delete task", StringComparison.OrdinalIgnoreCase))
+            {
+                var title = input.Substring("delete task".Length).Trim();
+                if (string.IsNullOrEmpty(title))
+                {
+                    string reply = "Cyber Buddy: Please provide the title of the task you want to delete.";
+                    rtbOutput.AppendText(reply + Environment.NewLine);
+                    asciiArt.Speak(reply);
+                }
+                else if (taskManager.DeleteTask(title))
+                {
+                    string reply = $"Cyber Buddy: Deleted Task: \"{title}\".";
+                    rtbOutput.AppendText(reply + Environment.NewLine);
+                    asciiArt.Speak(reply);
+                }
+                else
+                {
+                    string reply = $"Cyber Buddy: Couldn't find a task named \"{title}\".";
+                    rtbOutput.AppendText(reply + Environment.NewLine);
+                    asciiArt.Speak(reply);
+                }
+                ScrollToBottom();
+                txtInput.Clear();
+                return;
+            }
 
             // Get bot response
             string botResponse = chatbot.StartConversation(input, userName);
@@ -145,7 +230,7 @@ namespace POE_CyberBuddy
                 prompt.Height = 180;
                 prompt.Text = "Enter your username";
 
-                Label textLabel = new Label() { Left = 20, Top = 20, Text = "Please enter your username:", AutoSize = true};
+                Label textLabel = new Label() { Left = 20, Top = 20, Text = "Please enter your username:", AutoSize = true };
                 TextBox inputBox = new TextBox() { Left = 20, Top = 50, Width = 200 };
                 Button confirmation = new Button() { Text = "OK", Left = 230, Width = 40, Top = 48, DialogResult = DialogResult.OK };
 
@@ -165,6 +250,222 @@ namespace POE_CyberBuddy
 
                 return prompt.ShowDialog() == DialogResult.OK ? inputBox.Text.Trim() : null;
             }
+        }
+        private void BtnAddTask_Click(object sender, EventArgs e)
+        {
+            using (Form prompt = new Form())
+            {
+                prompt.Width = 400;
+                prompt.Height = 250;
+                prompt.Text = "Add New Task";
+
+                Label titleLabel = new Label() { Left = 20, Top = 20, Text = "Task Title:", AutoSize = true };
+                TextBox titleBox = new TextBox() { Left = 20, Top = 50, Width = 300 };
+                Label descriptionLabel = new Label() { Left = 20, Top = 90, Text = "Task Description:", AutoSize = true };
+                TextBox descriptionBox = new TextBox() { Left = 20, Top = 120, Width = 300 };
+                Button confirmation = new Button() { Text = "OK", Left = 20, Width = 100, Top = 160 };
+                confirmation.DialogResult = DialogResult.OK;
+
+                prompt.Controls.Add(titleLabel);
+                prompt.Controls.Add(titleBox);
+                prompt.Controls.Add(descriptionLabel);
+                prompt.Controls.Add(descriptionBox);
+                prompt.Controls.Add(confirmation);
+                prompt.AcceptButton = confirmation;
+
+                if (prompt.ShowDialog() == DialogResult.OK)
+                {
+                    string title = titleBox.Text.Trim();
+                    string description = descriptionBox.Text.Trim();
+
+                    if (!string.IsNullOrEmpty(title) && !string.IsNullOrEmpty(description))
+                    {
+                        // STEP 2: Ask if user wants a reminder
+                        var result = MessageBox.Show($"Task \"{title}\" added!\nWould you like to set a reminder?", "Add Reminder?", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+
+                        if (result == DialogResult.Yes)
+                        {
+                            int days = 0;
+                            bool validInput = false;
+
+                            while (!validInput)
+                            {
+                                using (Form reminderPrompt = new Form())
+                                {
+                                    reminderPrompt.Width = 350;
+                                    reminderPrompt.Height = 180;
+                                    reminderPrompt.Text = "Set Reminder";
+
+                                    Label reminderLabel = new Label() { Left = 20, Top = 20, AutoSize = true, Text = "Remind me in how many days?" };
+                                    TextBox reminderBox = new TextBox() { Left = 20, Top = 50, Width = 100 };
+                                    Button setButton = new Button() { Text = "Set", Left = 130, Width = 80, Top = 48 };
+                                    setButton.DialogResult = DialogResult.OK;
+
+                                    reminderPrompt.Controls.Add(reminderLabel);
+                                    reminderPrompt.Controls.Add(reminderBox);
+                                    reminderPrompt.Controls.Add(setButton);
+                                    reminderPrompt.AcceptButton = setButton;
+
+                                    var reminderResult = reminderPrompt.ShowDialog();
+
+                                    if (reminderResult == DialogResult.OK)
+                                    {
+                                        string input = reminderBox.Text.Trim();
+
+                                        if (int.TryParse(input, out days) && days > 0)
+                                        {
+                                            validInput = true;
+                                        }
+                                        else
+                                        {
+                                            MessageBox.Show("Please enter a valid number of days (e.g., 5) without extra words.", "Invalid Input", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                                        }
+                                    }
+                                    else
+                                    {
+                                        // User cancelled the reminder input prompt
+                                        break;
+                                    }
+                                }
+                            }
+
+                            if (validInput)
+                            {
+                                // Add task with reminder
+                                taskManager.AddTask(title, description, DateTime.Now.AddDays(days));
+                                string confirmMsg = $"Cyber Buddy: Task \"{title}\" added with a reminder in {days} days!\n";
+                                rtbOutput.AppendText(confirmMsg);
+                                asciiArt.Speak(confirmMsg);
+                            }
+                            else
+                            {
+                                // User cancelled or no valid input, add without reminder
+                                taskManager.AddTask(title, description);
+                                string confirmNoReminderMsg = $"Cyber Buddy: Task \"{title}\" added with no reminder.\n";
+                                rtbOutput.AppendText(confirmNoReminderMsg + Environment.NewLine);
+                                asciiArt.Speak(confirmNoReminderMsg);
+                            }
+                        }
+                        else
+                        {
+                            // User doesn’t want a reminder
+                            taskManager.AddTask(title, description);
+                            string noReminderMsg = $"Cyber Buddy: Task \"{title}\" added with no reminder.\n";
+                            rtbOutput.AppendText(noReminderMsg + Environment.NewLine);
+                            asciiArt.Speak(noReminderMsg);
+                        }
+                        string taskInstructions =
+                            "Cyber Buddy: To manage your tasks, you can type commands like:\n" +
+                            " - list tasks\n" +
+                            " - complete task [task title]\n" +
+                            " - delete task [task title]\n\n";
+
+                        rtbOutput.AppendText(taskInstructions);
+                        asciiArt.Speak(taskInstructions);
+                    }
+                    else
+                    {
+                        MessageBox.Show("Please provide both a title and description.", "Input Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+                }
+            }
+
+        }
+
+        private void btnStartQuiz_Click(object sender, EventArgs e)
+        {
+            isInQuiz = true;
+            quizManager.Reset();
+            AskNextQuestion();
+        }
+        private void AskNextQuestion()
+        {
+            if (quizManager.HasMoreQuestions())
+            {
+                var q = quizManager.GetCurrentQuestion();
+                rtbOutput.AppendText($"Cyber Buddy Quiz:\n{q.Text}\n");
+                asciiArt.Speak($"Question {quizManager.GetCurrentQuestionNumber()}: {q.Text}");
+                for (int i = 0; i < q.Options.Count; i++)
+                {
+                    rtbOutput.AppendText($"{q.Options[i]}\n");
+                }
+                ScrollToBottom();
+            }
+            else
+            {
+                EndQuiz();
+            }
+        }
+
+        private void HandleQuizResponse(string input)
+        {
+            // Expecting the user to reply with the option number or letter
+            int userChoice = -1;
+
+            // Try extracting number from user input
+            if (int.TryParse(input, out int parsedNumber))
+            {
+                userChoice = parsedNumber - 1;
+            }
+            else
+            {
+                // Try extracting A/B/C/D
+                var upperInput = input.ToUpper();
+                if (upperInput.Length == 1 && upperInput[0] >= 'A' && upperInput[0] <= 'D')
+                {
+                    userChoice = upperInput[0] - 'A';
+                }
+            }
+
+            if (userChoice != -1)
+            {
+                bool isCorrect = quizManager.CheckAnswer(userChoice, out string explanation);
+
+                if (isCorrect)
+                {
+                    rtbOutput.AppendText($"Cyber Buddy: Correct! {explanation}");
+                    asciiArt.Speak($"Correct! {explanation}");
+                    rtbOutput.AppendText("\n**************************************\n\n");
+                }
+                else
+                {
+                    rtbOutput.AppendText($"Cyber Buddy: Incorrect. {explanation}");
+                    asciiArt.Speak($"Incorrect. {explanation}");
+                    rtbOutput.AppendText("\n**************************************\n\n");
+                }
+
+                quizManager.MoveToNextQuestion();
+
+                if (quizManager.HasMoreQuestions())
+                {
+                    AskNextQuestion();
+                }
+                else
+                {
+                    EndQuiz();
+                }
+            }
+            else
+            {
+                rtbOutput.AppendText("Cyber Buddy: Please enter a valid option (e.g., A, B, C, D or 1, 2, 3, 4)!\n");
+                asciiArt.Speak("Please enter a valid option.");
+            }
+
+            ScrollToBottom();
+            txtInput.Clear();
+            txtInput.Focus();
+        }
+
+        private void EndQuiz()
+        {
+            isInQuiz = false;
+            int finalScore = quizManager.GetFinalScore();
+            var totalQuestions = quizManager.GetTotalQuestions();
+            var finalFeedback = quizManager.GetFinalFeedback();
+            var resultMessage = $"Cyber Buddy: Quiz finished!\nYour Score: {finalScore}/{totalQuestions}\n{finalFeedback}\n";
+            rtbOutput.AppendText(resultMessage);
+            asciiArt.Speak($"Quiz finished! You scored {finalScore} out of {totalQuestions}. {finalFeedback}");
+            ScrollToBottom();
         }
     }
 }
