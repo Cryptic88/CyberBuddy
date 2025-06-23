@@ -10,7 +10,9 @@ namespace POE_CyberBuddy
     public partial class Form1 : Form
     {
         private Conversation chatbot = new Conversation();
+        private ConversationPart2 conversationPart2;
         private ASCII_Effects asciiArt = new ASCII_Effects();
+        private TipsManager tipManager;
         private TaskManager taskManager = new TaskManager();
         private QuizManager quizManager = new QuizManager();
         private bool isInQuiz = false;
@@ -31,6 +33,8 @@ namespace POE_CyberBuddy
                 if (txtInput.Text == "Type your message here")
                     txtInput.Clear();
             };
+            tipManager = new TipsManager();
+            conversationPart2 = new ConversationPart2(asciiArt, tipManager, taskManager);
         }
 
 
@@ -176,6 +180,16 @@ namespace POE_CyberBuddy
                 txtInput.Clear();
                 return;
             }
+            var nlpResponse = conversationPart2.HandleNLPInput(input);
+            if (!string.IsNullOrEmpty(nlpResponse))
+            {
+                rtbOutput.AppendText($"You: {input}\n");
+                asciiArt.Speak(nlpResponse);
+                rtbOutput.AppendText(nlpResponse + Environment.NewLine);
+                ScrollToBottom();
+                txtInput.Clear();
+                return;
+            }
 
             // Get bot response
             string botResponse = chatbot.StartConversation(input, userName);
@@ -183,7 +197,7 @@ namespace POE_CyberBuddy
             if (!string.IsNullOrEmpty(botResponse))
             {
                 // Check if the bot response contains a tip keyword
-                // You can adjust these keywords based on your actual topics
+                
                 if (input.Contains("phishing", StringComparison.OrdinalIgnoreCase) ||
                     input.Contains("firewall", StringComparison.OrdinalIgnoreCase) ||
                     input.Contains("wifi", StringComparison.OrdinalIgnoreCase) ||

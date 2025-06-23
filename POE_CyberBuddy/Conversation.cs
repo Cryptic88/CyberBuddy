@@ -23,7 +23,7 @@ namespace POE_Cybersecurity_Chatbot
         public void Initialize(string userName)
         {
             memory.Name = userName;
-            keywordHandler = new ConversationPart2(asciiArt, tipManager);
+            keywordHandler = new ConversationPart2(asciiArt, tipManager, taskManager);
         } //Variable to track the current topic of conversation.
         public string ShowWelcomeMessage(string userName) =>
             $"Welcome {userName}! You can select a wide range of questions or form your own questions with keywords.\n" +
@@ -31,6 +31,7 @@ namespace POE_Cybersecurity_Chatbot
         public string GetCommandList() =>
             "Here are all the commands and keywords you can try:\n" +
             "- like to learn [add favorite topic]\n" +
+            "- Add task 'task title' with description 'task description'\n"+
             "- how are you\n" +
             "- who are you\n" +
             "- help\n" +
