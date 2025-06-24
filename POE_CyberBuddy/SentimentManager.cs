@@ -10,6 +10,7 @@ namespace POE_Cybersecurity_Chatbot
     {
         private TipsManager tipsManager = new TipsManager();
 
+
         private Dictionary<string, string> sentimentResponses = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase) //(Stack Overflow, 2012)
         {
             { "worried", "It's completely understandable to feel worried. Let me share some tips to help you stay safe and delete those worries you have." },
@@ -23,12 +24,16 @@ namespace POE_Cybersecurity_Chatbot
         private List<string> topics = new List<string> { "password", "passwords", "phishing", "wifi", "usb", "usbs", "browse", "browsing", "social engineering", "firewalls", "firewall" };
 
 
-        public string DetectAndRespond(string input, string userName)
+        public string? DetectAndRespond(string input, string userName, out string? detectedEmotion, out string? detectedTopic)
         {
+            detectedEmotion = null;
+            detectedTopic = null;
+            var lowerInput = input.ToLower();
             foreach (var emotion in sentimentResponses.Keys)
             {
                 if (input.IndexOf(emotion, StringComparison.OrdinalIgnoreCase) >= 0) //(Microsoft Learn, 2025)
                 {
+                    detectedEmotion = emotion;
                     string emotionResponse = sentimentResponses[emotion];
 
 
@@ -37,14 +42,14 @@ namespace POE_Cybersecurity_Chatbot
                     {
                         if (input.IndexOf(topic, StringComparison.OrdinalIgnoreCase) >= 0) //(Microsoft Learn, 2025)
                         {
+                            detectedTopic = topic;
                             // Combine emotional support + practical tip
                             string tip = tipsManager.GetRandomTip(topic);
-                            return $"Cyber Buddy: {emotionResponse} Since you mentioned {topic}, here’s a quick tip to help:\n" +
-                                $"Tip: {tip}\n" +
+                            return $"Cyber Buddy: {emotionResponse} Since you mentioned {topic}, here’s a quick tip to help:\n\n" +
+                                $"Tip: \n{tip}\n" +
                                 $"\n*****************************************\n";
                         }
                     }
-
                     // If no topic is mentioned, just give the emotional support
                     return $"Cyber Buddy: {emotionResponse}\n" +
                         $"\n*****************************************\n";

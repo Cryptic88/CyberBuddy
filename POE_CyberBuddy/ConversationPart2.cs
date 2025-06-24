@@ -1,4 +1,7 @@
-﻿using POE_CyberBuddy;
+﻿using System;
+using System.Diagnostics.Eventing.Reader;
+using POE_CyberBuddy;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement.StartPanel;
 
 namespace POE_Cybersecurity_Chatbot
 {
@@ -7,15 +10,20 @@ namespace POE_Cybersecurity_Chatbot
         
         private TipsManager tipManager;
         private TaskManager taskManager;
+        private ExplanationManager explanationManager;
+        private SentimentManager sentimentManager;
+        private Memory memory = new Memory();
         private string? lastAddedTaskTitle = null;
-
+        private string currentTopic;
         private List<string> recentActions = new List<string>();
-
+        private List<string> activityLog = new List<string>();
         public ConversationPart2(ASCII_Effects asciiArt, TipsManager tipManager, TaskManager taskManager)
         {
             
             this.tipManager = tipManager;
             this.taskManager = taskManager;
+            this.sentimentManager = new SentimentManager();
+            this.explanationManager = new ExplanationManager();
         }
 
 
@@ -61,10 +69,12 @@ namespace POE_Cybersecurity_Chatbot
             var tip = tipManager.GetRandomTip(topic);
             var response = $"Cyber Buddy: {tip}\n\n*****************************************\n";
 
+            LogAction($"User requested a tip on \"{topic}\"");
+
             return response;
         }
 
-        public string? HandleNLPInput(string input)
+        public string? HandleNLPInput(string input, string userName)
         {
             var lowerInput = input.ToLower();
 
@@ -78,8 +88,39 @@ namespace POE_Cybersecurity_Chatbot
             {
                 return HandleTaskInput(lowerInput);
             }
+            else
+            {
+                string? sentimentResponse = sentimentManager.DetectAndRespond(lowerInput, userName, out string detectedEmotion, out string detectedTopic);
+                if (sentimentResponse != null)
+                {
+                    LogAction($"User expressed emotion: {detectedEmotion} about topic: {detectedTopic}");
+                    return sentimentResponse;
+                }
+                string? tipResponse = tipManager.HandleTipRequest(lowerInput, ref currentTopic);
+                if (!string.IsNullOrEmpty(tipResponse))
+                {
+                    LogAction($"User asked for a tip about topic: {currentTopic}");
+                    return tipResponse;
+                }
+
+                string? explanationResponse = explanationManager.HandleExplanation(lowerInput, ref currentTopic);
+                if (!string.IsNullOrEmpty(explanationResponse))
+                {
+                    LogAction($"User asked for explanation of topic: {currentTopic}");
+                    return explanationResponse;
+                }
+
+                string? interestResponse = memory.HandleInterestInput(lowerInput);
+                if (interestResponse != null)
+                {
+                    // Log user interest topic
+                    LogAction($"User expressed interest in topic: {memory.FavoriteTopic}");
+                    return interestResponse;
+                }
+            }
+
             // Recent Actions
-            else if (lowerInput.Contains("what have you done") || lowerInput.Contains("recent"))
+            if (lowerInput.Contains("what have you done") || lowerInput.Contains("recent"))
             {
                 return ShowRecentActions();
             }
@@ -116,6 +157,7 @@ namespace POE_Cybersecurity_Chatbot
                     {
                         task.ReminderDate = reminderDate;
                         recentActions.Add($"Reminder set for task \"{task.Title}\" on {reminderDate:yyyy-MM-dd}");
+                        LogAction($"Reminder set for task \"{task.Title}\" on {reminderDate:yyyy-MM-dd}");
                         return $"Cyber Buddy: Reminder set for task \"{task.Title}\" on {reminderDate:yyyy-MM-dd}.\n";
                     }
                 }
@@ -141,6 +183,7 @@ namespace POE_Cybersecurity_Chatbot
                 taskManager.AddTask(taskTitle, description);
                 lastAddedTaskTitle = taskTitle;
                 recentActions.Add($"Task added: \"{taskTitle}\"");
+                LogAction($"Task added: \"{taskTitle}\"");
                 return $"Cyber Buddy: Task \"{taskTitle}\" added with description \"{description}\".\n" +
                        "If you’d like to set a reminder, just say \"Remind me on '2025-01-01'\".";
             }
@@ -154,6 +197,7 @@ namespace POE_Cybersecurity_Chatbot
                 taskManager.AddTask(taskTitle, description);
                 lastAddedTaskTitle = taskTitle;
                 recentActions.Add($"Task added: \"{taskTitle}\"");
+                LogAction($"Task added: \"{taskTitle}\"");
                 return $"Cyber Buddy: Task \"{taskTitle}\" added with no description.\nIf you’d like to set a reminder, just say \"Remind me to... on '2025-01-01'\".";
             }
             else
@@ -177,6 +221,52 @@ namespace POE_Cybersecurity_Chatbot
                 }
                 return summary;
             }
+        }
+
+
+        private int displayedCount = 0;      // How many activities are currently displayed
+        private const int pageSize = 10;     // Show 10 at a time
+
+        public string ShowActivityLog(bool showMore = false)
+        {
+            if (activityLog.Count == 0)
+                return "Cyber Buddy: No recent activity.";
+
+            if (showMore)
+            {
+                displayedCount += pageSize;
+            }
+            else
+            {
+                displayedCount = pageSize;
+            }
+            if (displayedCount > activityLog.Count)
+            {
+                displayedCount = activityLog.Count;
+            }
+
+            var recent = activityLog.Skip(activityLog.Count - displayedCount).Take(displayedCount).ToList();
+
+            var summary = $"Cyber Buddy: Showing {displayedCount} of {activityLog.Count} activities:\n";
+
+            for (int i = 0; i < recent.Count; i++)
+            {
+                summary += $"{i + 1}. {recent[i]}\n";
+            }
+
+            if (displayedCount < activityLog.Count)
+            {
+                summary += "\nType 'show more' to see additional activities.";
+            }
+
+            return summary;
+        }
+        public void LogAction(string actionDescription)
+        {
+           
+            activityLog.Add(actionDescription);
+
+            displayedCount = 0;
         }
     }
 }

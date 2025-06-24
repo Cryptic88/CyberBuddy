@@ -1,8 +1,9 @@
 using System;
-using System.Windows.Forms;
 using System.Media;
-using System.Threading.Tasks;
 using System.Threading;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+using Microsoft.VisualBasic;
 using POE_Cybersecurity_Chatbot;
 
 namespace POE_CyberBuddy
@@ -104,8 +105,31 @@ namespace POE_CyberBuddy
                 return;
             }
 
+            if (input.Equals("show more", StringComparison.OrdinalIgnoreCase))
+            {
+                var reply = conversationPart2.ShowActivityLog(showMore: true);
+                rtbOutput.AppendText($"You: {input}\n{reply}\n");
+                asciiArt.Speak("Here are more activities from your log.");
+                ScrollToBottom();
+                txtInput.Clear();
+                return;
+            }
+
+            if (input.Equals("show activity log", StringComparison.OrdinalIgnoreCase) ||
+            input.Equals("what have you done", StringComparison.OrdinalIgnoreCase))
+            {
+                var reply = conversationPart2.ShowActivityLog();
+                rtbOutput.AppendText($"You: {input}\n{reply}\n");
+                asciiArt.Speak("Here’s a summary of recent activity."); // Speak only the summary
+                ScrollToBottom();
+                txtInput.Clear();
+                return;
+            }
+
             if (input.Equals("list tasks", StringComparison.OrdinalIgnoreCase))
             {
+                conversationPart2.LogAction("User requested to list all tasks.");
+
                 var allTasks = taskManager.GetAllTasks();
                 if (allTasks.Count == 0)
                 {
@@ -140,12 +164,14 @@ namespace POE_CyberBuddy
                 }
                 else if (taskManager.CompleteTask(title))
                 {
+                    conversationPart2.LogAction($"User completed task: \"{title}\"");
                     string reply = $"Cyber Buddy: Marked task \"{title}\" as completed.";
                     rtbOutput.AppendText(reply + Environment.NewLine);
                     asciiArt.Speak(reply);
                 }
                 else
                 {
+                    conversationPart2.LogAction($"User tried to complete a non-existing task: \"{title}\"");
                     string reply = $"Cyber Buddy: Couldn't find a task named \"{title}\".";
                     rtbOutput.AppendText(reply + Environment.NewLine);
                     asciiArt.Speak(reply);
@@ -166,12 +192,14 @@ namespace POE_CyberBuddy
                 }
                 else if (taskManager.DeleteTask(title))
                 {
+                    conversationPart2.LogAction($"User deleted task: \"{title}\"");
                     string reply = $"Cyber Buddy: Deleted Task: \"{title}\".";
                     rtbOutput.AppendText(reply + Environment.NewLine);
                     asciiArt.Speak(reply);
                 }
                 else
                 {
+                    conversationPart2.LogAction($"User tried to delete a non-existing task: \"{title}\"");
                     string reply = $"Cyber Buddy: Couldn't find a task named \"{title}\".";
                     rtbOutput.AppendText(reply + Environment.NewLine);
                     asciiArt.Speak(reply);
@@ -180,7 +208,7 @@ namespace POE_CyberBuddy
                 txtInput.Clear();
                 return;
             }
-            var nlpResponse = conversationPart2.HandleNLPInput(input);
+            var nlpResponse = conversationPart2.HandleNLPInput(input, userName);
             if (!string.IsNullOrEmpty(nlpResponse))
             {
                 rtbOutput.AppendText($"You: {input}\n");
@@ -197,7 +225,7 @@ namespace POE_CyberBuddy
             if (!string.IsNullOrEmpty(botResponse))
             {
                 // Check if the bot response contains a tip keyword
-                
+
                 if (input.Contains("phishing", StringComparison.OrdinalIgnoreCase) ||
                     input.Contains("firewall", StringComparison.OrdinalIgnoreCase) ||
                     input.Contains("wifi", StringComparison.OrdinalIgnoreCase) ||
@@ -347,6 +375,7 @@ namespace POE_CyberBuddy
                             {
                                 // Add task with reminder
                                 taskManager.AddTask(title, description, DateTime.Now.AddDays(days));
+                                conversationPart2.LogAction($"User added task: \"{title}\" with reminder set in {days} days.");
                                 string confirmMsg = $"Cyber Buddy: Task \"{title}\" added with a reminder in {days} days!\n";
                                 rtbOutput.AppendText(confirmMsg);
                                 asciiArt.Speak(confirmMsg);
@@ -355,6 +384,7 @@ namespace POE_CyberBuddy
                             {
                                 // User cancelled or no valid input, add without reminder
                                 taskManager.AddTask(title, description);
+                                conversationPart2.LogAction($"User added task: \"{title}\" without a reminder (reminder cancelled or invalid input).");
                                 string confirmNoReminderMsg = $"Cyber Buddy: Task \"{title}\" added with no reminder.\n";
                                 rtbOutput.AppendText(confirmNoReminderMsg + Environment.NewLine);
                                 asciiArt.Speak(confirmNoReminderMsg);
@@ -364,6 +394,7 @@ namespace POE_CyberBuddy
                         {
                             // User doesn’t want a reminder
                             taskManager.AddTask(title, description);
+                            conversationPart2.LogAction($"User added task: \"{title}\" without a reminder (user declined).");
                             string noReminderMsg = $"Cyber Buddy: Task \"{title}\" added with no reminder.\n";
                             rtbOutput.AppendText(noReminderMsg + Environment.NewLine);
                             asciiArt.Speak(noReminderMsg);
@@ -390,6 +421,7 @@ namespace POE_CyberBuddy
         {
             isInQuiz = true;
             quizManager.Reset();
+            conversationPart2.LogAction("Quiz started by user.");
             AskNextQuestion();
         }
         private void AskNextQuestion()
@@ -404,6 +436,8 @@ namespace POE_CyberBuddy
                     rtbOutput.AppendText($"{q.Options[i]}\n");
                 }
                 ScrollToBottom();
+
+                conversationPart2.LogAction($"Question {quizManager.GetCurrentQuestionNumber()} displayed: \"{q.Text}\"");
             }
             else
             {
@@ -434,6 +468,7 @@ namespace POE_CyberBuddy
             if (userChoice != -1)
             {
                 bool isCorrect = quizManager.CheckAnswer(userChoice, out string explanation);
+                conversationPart2.LogAction($"User answered question {quizManager.GetCurrentQuestionNumber()} with option {(char)('A' + userChoice)} - {(isCorrect ? "Correct" : "Incorrect")}");
 
                 if (isCorrect)
                 {
@@ -480,6 +515,14 @@ namespace POE_CyberBuddy
             rtbOutput.AppendText(resultMessage);
             asciiArt.Speak($"Quiz finished! You scored {finalScore} out of {totalQuestions}. {finalFeedback}");
             ScrollToBottom();
+
+            conversationPart2.LogAction($"Quiz finished. Final score: {finalScore}/{totalQuestions}");
+        }
+
+        private void btnActivityLog_Click(object sender, EventArgs e)
+        {
+            var log = conversationPart2.ShowActivityLog();
+            rtbOutput.AppendText(log + Environment.NewLine);
         }
     }
 }

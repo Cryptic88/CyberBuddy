@@ -8,6 +8,7 @@ namespace POE_Cybersecurity_Chatbot
 {
     public class Memory
     {
+
         public string Name { get; set; }
         public string FavoriteTopic { get; set; }
 
@@ -24,9 +25,11 @@ namespace POE_Cybersecurity_Chatbot
                     if (input.Contains(topic))
                     {
                         FavoriteTopic = topic;
+
                         return $"Cyber Buddy: Great! I'll remember that you're interested in {topic}." +
                             $" It's an important part of staying safe online.\n" +
                             $"\n*****************************************\n";
+
                     }
                 }
                 return "Cyber Buddy: I’d love to remember your interests. Could you be more specific, like 'I'm interested in phishing'?\n" +

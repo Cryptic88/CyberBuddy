@@ -38,6 +38,7 @@ namespace POE_CyberBuddy
             btnCommands = new Button();
             btnAddTask = new Button();
             btnStartQuiz = new Button();
+            btnActivityLog = new Button();
             SuspendLayout();
             // 
             // rtbOutput
@@ -117,11 +118,23 @@ namespace POE_CyberBuddy
             btnStartQuiz.UseVisualStyleBackColor = false;
             btnStartQuiz.Click += btnStartQuiz_Click;
             // 
+            // btnActivityLog
+            // 
+            btnActivityLog.BackColor = Color.PaleTurquoise;
+            btnActivityLog.Location = new Point(236, 419);
+            btnActivityLog.Name = "btnActivityLog";
+            btnActivityLog.Size = new Size(101, 29);
+            btnActivityLog.TabIndex = 7;
+            btnActivityLog.Text = "Activity Log";
+            btnActivityLog.UseVisualStyleBackColor = false;
+            btnActivityLog.Click += btnActivityLog_Click;
+            // 
             // Form1
             // 
             AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(800, 450);
+            Controls.Add(btnActivityLog);
             Controls.Add(btnStartQuiz);
             Controls.Add(btnCommands);
             Controls.Add(lblLoggedIn);
@@ -138,5 +151,6 @@ namespace POE_CyberBuddy
         #endregion
 
         private Button btnStartQuiz;
+        private Button btnActivityLog;
     }
 }

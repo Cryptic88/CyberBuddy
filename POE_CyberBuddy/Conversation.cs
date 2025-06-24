@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.Eventing.Reader;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -10,20 +11,20 @@ namespace POE_Cybersecurity_Chatbot
     public class Conversation
     {
         ASCII_Effects asciiArt = new ASCII_Effects();
-        private ExplanationManager explanationManager = new ExplanationManager();
+        private ExplanationManager explanationManager;
         Memory memory = new Memory();
         private TipsManager tipManager = new TipsManager();
-        private SentimentManager sentimentManager = new SentimentManager();
+        private SentimentManager sentimentManager;
         private ConversationPart2 keywordHandler;
         private TaskManager taskManager = new TaskManager();
-        private TaskItem pendingTask;
-
         private string currentTopic;
 
         public void Initialize(string userName)
         {
             memory.Name = userName;
             keywordHandler = new ConversationPart2(asciiArt, tipManager, taskManager);
+            explanationManager = new ExplanationManager();
+            sentimentManager = new SentimentManager();
         } //Variable to track the current topic of conversation.
         public string ShowWelcomeMessage(string userName) =>
             $"Welcome {userName}! You can select a wide range of questions or form your own questions with keywords.\n" +
@@ -31,6 +32,7 @@ namespace POE_Cybersecurity_Chatbot
         public string GetCommandList() =>
             "Here are all the commands and keywords you can try:\n" +
             "- like to learn [add favorite topic]\n" +
+            "- Show activity log"+
             "- Add task 'task title' with description 'task description'\n"+
             "- how are you\n" +
             "- who are you\n" +
@@ -54,23 +56,13 @@ namespace POE_Cybersecurity_Chatbot
                 return $"Cyber Buddy: Just a reminder — since you're interested in {memory.FavoriteTopic}, you can ask about it any time using keywords like 'tips' or 'advice'.";
             }
 
-            var memoryResponse = memory.HandleInterestInput(userInput);
-            if (!string.IsNullOrEmpty(memoryResponse))
+
+            var nlpResponse = keywordHandler.HandleNLPInput(userInput, userName);
+            if (!string.IsNullOrEmpty(nlpResponse))
             {
-                return memoryResponse;
+                return nlpResponse;
             }
 
-            var tipResponse = tipManager.HandleTipRequest(userInput, ref currentTopic);
-            if (!string.IsNullOrEmpty(tipResponse))
-            {
-                return tipResponse;
-            }
-
-            var explanationResponse = explanationManager.HandleExplanation(userInput, ref currentTopic);
-            if (!string.IsNullOrEmpty(explanationResponse))
-            {
-                return explanationResponse;
-            }
 
             switch (userInput.ToLower()) // (W3schools, 2025)
             {
@@ -95,12 +87,6 @@ namespace POE_Cybersecurity_Chatbot
 
                 default:
 
-                    string sentimentResponse = sentimentManager.DetectAndRespond(userInput, userName);
-                    if (!string.IsNullOrEmpty(sentimentResponse))
-                    {
-                        return sentimentResponse;
-                    }
-
                     var foundKeywordResponse = keywordHandler.HandleKeywords(userInput, ref currentTopic);
                     if (!string.IsNullOrEmpty(foundKeywordResponse))
                     {
@@ -117,6 +103,8 @@ namespace POE_Cybersecurity_Chatbot
                     return reply;
             }
         }
+
+        
 
     }
 }

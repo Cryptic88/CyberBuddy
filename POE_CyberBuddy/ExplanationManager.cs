@@ -3,11 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using POE_CyberBuddy;
 
 namespace POE_Cybersecurity_Chatbot
 {
     class ExplanationManager
     {
+
         private Dictionary<string, List<string>> explanations = new Dictionary<string, List<string>>() //(Stack Overflow, 2023)
         {
             {
@@ -203,6 +205,7 @@ namespace POE_Cybersecurity_Chatbot
                         currentTopic = topic;
                         string explanation = GetExplanation(topic);
                         string response = $"Cyber Buddy: {explanation}\n\n*****************************************\n";
+                        
                         return response;
                     }
                 }
