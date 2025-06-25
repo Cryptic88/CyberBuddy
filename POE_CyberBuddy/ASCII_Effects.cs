@@ -41,7 +41,25 @@ namespace POE_Cybersecurity_Chatbot
             synthesizer.SelectVoice("Microsoft Zira Desktop");
             synthesizer.SpeakAsync(RemoveAscii(text));
         }
+        public async Task SpeakAsync(string text)
+        {
+            var tcs = new TaskCompletionSource<bool>();
+            EventHandler<SpeakCompletedEventArgs> handler = null;
 
+            handler = (s, e) =>
+            {
+                synthesizer.SpeakCompleted -= handler;
+                tcs.SetResult(true);
+            };
+            synthesizer.SpeakCompleted += handler;
+
+            synthesizer.Rate = -1;
+            synthesizer.Volume = 100;
+            synthesizer.SelectVoice("Microsoft Zira Desktop");
+            synthesizer.SpeakAsync(RemoveAscii(text));
+
+            await tcs.Task;
+        }
 
         // Helper method to strip ASCII art or non-speechable text
         private string RemoveAscii(string input) =>

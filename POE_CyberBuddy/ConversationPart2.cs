@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics.Eventing.Reader;
+using System.Text.RegularExpressions;
 using POE_CyberBuddy;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement.StartPanel;
 
@@ -7,7 +8,7 @@ namespace POE_Cybersecurity_Chatbot
 {
     public class ConversationPart2
     {
-        
+
         private TipsManager tipManager;
         private TaskManager taskManager;
         private ExplanationManager explanationManager;
@@ -133,38 +134,84 @@ namespace POE_Cybersecurity_Chatbot
 
         private string? HandleReminderInput(string userInput)
         {
-            if (string.IsNullOrEmpty(lastAddedTaskTitle))
-            {
-                return "Cyber Buddy: Please add a task first before setting a reminder.";
-            }
+            var matchSetReminder = Regex.Match(userInput,
+                @"set reminder for (?<title>.+) in (?<days>\d+) days?",
+                RegexOptions.IgnoreCase);
 
-            // Check for "remind me on yyyy-MM-dd"
-            var matchOnDate = System.Text.RegularExpressions.Regex.Match(
-                userInput,
-                @"remind me on (?<date>\d{4}-\d{2}-\d{2})",
-                System.Text.RegularExpressions.RegexOptions.IgnoreCase
-            );
-
-            if (matchOnDate.Success)
+            if (matchSetReminder.Success)
             {
-                var dateStr = matchOnDate.Groups["date"].Value;
-                if (DateTime.TryParse(dateStr, out var reminderDate))
+                var taskTitle = matchSetReminder.Groups["title"].Value.Trim();
+                var daysStr = matchSetReminder.Groups["days"].Value;
+
+                if (int.TryParse(daysStr, out int days) && days > 0)
                 {
+                    var reminderDate = DateTime.Now.AddDays(days);
                     var task = taskManager.GetAllTasks()
-                        .FirstOrDefault(t => t.Title.Equals(lastAddedTaskTitle, StringComparison.OrdinalIgnoreCase));
+                        .FirstOrDefault(t => t.Title.Equals(taskTitle, StringComparison.OrdinalIgnoreCase));
 
                     if (task != null)
                     {
                         task.ReminderDate = reminderDate;
-                        recentActions.Add($"Reminder set for task \"{task.Title}\" on {reminderDate:yyyy-MM-dd}");
-                        LogAction($"Reminder set for task \"{task.Title}\" on {reminderDate:yyyy-MM-dd}");
-                        return $"Cyber Buddy: Reminder set for task \"{task.Title}\" on {reminderDate:yyyy-MM-dd}.\n";
+
+                        recentActions.Add($"Reminder set for task \"{task.Title}\" in {days} days (on {reminderDate:yyyy-MM-dd})");
+                        LogAction($"Reminder set for task \"{task.Title}\" in {days} days (on {reminderDate:yyyy-MM-dd})");
+
+                        return $"Cyber Buddy: Reminder set for task \"{task.Title}\" in {days} days, on {reminderDate:yyyy-MM-dd}.\n";
+                    }
+                    else
+                    {
+                        return $"Cyber Buddy: Task titled \"{taskTitle}\" not found.\n";
                     }
                 }
-                return $"Cyber Buddy: The date \"{dateStr}\" is not valid or no task found.";
+                else
+                {
+                    return "Cyber Buddy: Please specify a valid number of days.";
+                }
             }
 
-            return "Cyber Buddy: Please specify a date like 'Remind me on yyyy-MM-dd'.\n";
+            if (!string.IsNullOrEmpty(lastAddedTaskTitle))
+            {
+                var matchRemindMeInDays = Regex.Match(userInput,
+                    @"remind me in (?<days>\d+) days?",
+                    RegexOptions.IgnoreCase);
+
+                if (matchRemindMeInDays.Success)
+                {
+                    var daysStr = matchRemindMeInDays.Groups["days"].Value;
+
+                    if (int.TryParse(daysStr, out int days) && days > 0)
+                    {
+                        var reminderDate = DateTime.Now.AddDays(days);
+                        var task = taskManager.GetAllTasks()
+                            .FirstOrDefault(t => t.Title.Equals(lastAddedTaskTitle, StringComparison.OrdinalIgnoreCase));
+
+                        if (task != null)
+                        {
+                            task.ReminderDate = reminderDate;
+
+                            recentActions.Add($"Reminder set for task \"{task.Title}\" in {days} days (on {reminderDate:yyyy-MM-dd})");
+                            LogAction($"Reminder set for task \"{task.Title}\" in {days} days (on {reminderDate:yyyy-MM-dd})");
+
+                            return $"Cyber Buddy: Reminder set for task \"{task.Title}\" in {days} days, on {reminderDate:yyyy-MM-dd}.\n";
+                        }
+                        else
+                        {
+                            return $"Cyber Buddy: No task found with title \"{lastAddedTaskTitle}\".\n";
+                        }
+                    }
+                    else
+                    {
+                        return "Cyber Buddy: Please specify a valid number of days.";
+                    }
+                }
+            }
+            else
+            {
+                return "Cyber Buddy: Please add a task first before setting a reminder.";
+            }
+
+
+            return "Cyber Buddy: Please specify a reminder like:\n- \"set reminder for TaskTitle in X days\"\n- \"remind me in X days\".";
         }
 
         private string? HandleTaskInput(string userInput)
@@ -198,7 +245,7 @@ namespace POE_Cybersecurity_Chatbot
                 lastAddedTaskTitle = taskTitle;
                 recentActions.Add($"Task added: \"{taskTitle}\"");
                 LogAction($"Task added: \"{taskTitle}\"");
-                return $"Cyber Buddy: Task \"{taskTitle}\" added with no description.\nIf you’d like to set a reminder, just say \"Remind me to... on '2025-01-01'\".";
+                return $"Cyber Buddy: Task \"{taskTitle}\" added with no description.\nIf you’d like to set a reminder, just say \"Remind me in 5 days'\".\n";
             }
             else
             {
@@ -247,7 +294,7 @@ namespace POE_Cybersecurity_Chatbot
 
             var recent = activityLog.Skip(activityLog.Count - displayedCount).Take(displayedCount).ToList();
 
-            var summary = $"Cyber Buddy: Showing {displayedCount} of {activityLog.Count} activities:\n";
+            var summary = $"\nCyber Buddy: Showing {displayedCount} of {activityLog.Count} activities:\n";
 
             for (int i = 0; i < recent.Count; i++)
             {
@@ -258,7 +305,6 @@ namespace POE_Cybersecurity_Chatbot
             {
                 summary += "\nType 'show more' to see additional activities.";
             }
-
             return summary;
         }
         public void LogAction(string actionDescription)

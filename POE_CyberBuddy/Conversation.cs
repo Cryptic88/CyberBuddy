@@ -32,7 +32,7 @@ namespace POE_Cybersecurity_Chatbot
         public string GetCommandList() =>
             "Here are all the commands and keywords you can try:\n" +
             "- like to learn [add favorite topic]\n" +
-            "- Show activity log"+
+            "- Show activity log\n"+
             "- Add task 'task title' with description 'task description'\n"+
             "- how are you\n" +
             "- who are you\n" +

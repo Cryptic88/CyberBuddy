@@ -7,7 +7,7 @@ using POE_CyberBuddy;
 
 namespace POE_Cybersecurity_Chatbot
 {
-    class ExplanationManager
+    public class ExplanationManager
     {
 
         private Dictionary<string, List<string>> explanations = new Dictionary<string, List<string>>() //(Stack Overflow, 2023)
