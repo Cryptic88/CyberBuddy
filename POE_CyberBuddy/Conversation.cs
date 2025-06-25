@@ -11,10 +11,8 @@ namespace POE_Cybersecurity_Chatbot
     public class Conversation
     {
         ASCII_Effects asciiArt = new ASCII_Effects();
-        private ExplanationManager explanationManager;
         Memory memory = new Memory();
         private TipsManager tipManager = new TipsManager();
-        private SentimentManager sentimentManager;
         private ConversationPart2 keywordHandler;
         private TaskManager taskManager = new TaskManager();
         private string currentTopic;
@@ -23,12 +21,11 @@ namespace POE_Cybersecurity_Chatbot
         {
             memory.Name = userName;
             keywordHandler = new ConversationPart2(asciiArt, tipManager, taskManager);
-            explanationManager = new ExplanationManager();
-            sentimentManager = new SentimentManager();
+
         } //Variable to track the current topic of conversation.
         public string ShowWelcomeMessage(string userName) =>
             $"Welcome {userName}! You can select a wide range of questions or form your own questions with keywords.\n" +
-            "You can also view all commands and keywords by clicking the 'Commands' button in the top right corner.\n";
+            "You can also view all commands and keywords by clicking the 'Commands' button in the top right corner.\n"; // (// (Microsoft Learn, 2025)
         public string GetCommandList() =>
             "Here are all the commands and keywords you can try:\n" +
             "- like to learn [add favorite topic]\n" +
@@ -53,7 +50,7 @@ namespace POE_Cybersecurity_Chatbot
 
             if (!string.IsNullOrEmpty(memory.FavoriteTopic) && new Random().Next(0, 5) == 0)
             {
-                return $"Cyber Buddy: Just a reminder — since you're interested in {memory.FavoriteTopic}, you can ask about it any time using keywords like 'tips' or 'advice'.";
+                return $"Cyber Buddy: Just a reminder — since you're interested in {memory.FavoriteTopic}, you can ask about it any time using keywords like 'tips' or 'advice'."; // (Microsoft, 2025)
             }
 
 
@@ -67,14 +64,14 @@ namespace POE_Cybersecurity_Chatbot
             switch (userInput.ToLower()) // (W3schools, 2025)
             {
                 case "how are you":
-                    return $"Cyber Buddy: I'm just a bunch of code resembling a Cyber Security Chatbot, but I'm functioning well! Thanks for asking, {userName}.";
+                    return $"Cyber Buddy: I'm just a bunch of code resembling a Cyber Security Chatbot, but I'm functioning well! Thanks for asking, {userName}."; //(Microsoft Learn, 2025)
 
                 case "who are you":
                     return "Cyber Buddy: I'm your Cyber Security Buddy — here to help you stay safe online.";
 
                 case "thank you":
                 case "thanks":
-                    return $"Cyber Buddy: You're very welcome, {userName}! Let me know if you need help with anything else.";
+                    return $"Cyber Buddy: You're very welcome, {userName}! Let me know if you need help with anything else."; //(Microsoft Learn, 2025)
 
                 case "clear":
                     return "Cyber Buddy: Console cleared. Let's continue!";
@@ -118,11 +115,4 @@ namespace POE_Cybersecurity_Chatbot
   https://www.w3schools.com/cs/cs_switch.php
   [Accessed 10 April 2025].
 
-  GeeksforGeeks, 2021. ref in C#. [online] Available at: 
-  https://www.geeksforgeeks.org/ref-in-c-sharp/ 
-  (Accessed: 21 May 2025).
-
-  Microsoft, 2025b. Random.Next Method (System). [online] Available at: 
-  https://learn.microsoft.com/en-us/dotnet/api/system.random.next?view=net-9.0 
-  (Accessed: 22 May 2025).
  */

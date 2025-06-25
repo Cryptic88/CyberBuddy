@@ -17,7 +17,6 @@ namespace POE_CyberBuddy
         private ASCII_Effects asciiArt = new ASCII_Effects();
         private TipsManager tipManager;
         private ExplanationManager explanationManager = new ExplanationManager();
-        private string currentTopic;
         private TaskManager taskManager = new TaskManager();
         private QuizManager quizManager = new QuizManager();
         private SentimentManager sentimentManager = new SentimentManager();
@@ -31,7 +30,7 @@ namespace POE_CyberBuddy
 
             asciiArt = new ASCII_Effects();
             tipManager = new TipsManager();
-            taskManager = new TaskManager();        // Make sure you have this instantiated
+            taskManager = new TaskManager();        
             conversationPart2 = new ConversationPart2(asciiArt, tipManager, taskManager);
             sentimentManager = new SentimentManager();
             explanationManager = new ExplanationManager();
@@ -39,11 +38,25 @@ namespace POE_CyberBuddy
             quizManager = new QuizManager();
             quizHandler = new QuizHandler(
                 quizManager,
-                text => rtbOutput.AppendText(text),                   // UI Append Text
+                text =>
+                {
+                    if (rtbOutput.InvokeRequired)
+                    {
+                        rtbOutput.Invoke(new Action(() => {
+                        rtbOutput.AppendText(text);
+                        ScrollToBottom();
+                        }));
+                    }
+                    else
+                    {
+                        rtbOutput.AppendText(text);
+                        ScrollToBottom();
+                    }
+                },                  // UI Append Text
                 async (text) => await asciiArt.SpeakAsync(text),      // Text-to-speech async
                 ScrollToBottom,                                       // Scroll UI
                 log => conversationPart2.LogAction(log)
-            );
+            ); // (Microsoft Learn, 2024)
 
             // Instantiate InputProcessor with dependencies and UI callbacks
             inputProcessor = new InputProcessor(
@@ -61,14 +74,14 @@ namespace POE_CyberBuddy
                 () => isInQuiz,
                 input => quizHandler.HandleResponse(input),
                 (input, user) => conversationPart2.HandleNLPInput(input, user)
-            );
+            ); // (Microsoft Learn, 2024)
 
             // Event connections
             btnSend.Click += BtnSend_Click;
             btnCommands.Click += BtnCommands_Click;
             txtInput.KeyDown += TxtInput_KeyDown;
 
-            // Optional: Clear placeholder text when clicked
+            // Clear placeholder text when clicked
             txtInput.Click += (s, e) =>
             {
                 if (txtInput.Text == "Type your message here")
@@ -83,7 +96,7 @@ namespace POE_CyberBuddy
 
             using (var prompt = new UsernamePrompt())
             {
-                if (prompt.ShowDialog() == DialogResult.OK)
+                if (prompt.ShowDialog() == DialogResult.OK) //(Microsoft Learn, 2025)
                 {
                     userName = prompt.UserName;
                 }
@@ -105,7 +118,7 @@ namespace POE_CyberBuddy
             SoundPlayer player = new SoundPlayer("Recording.wav");
             player.Play();
 
-            Font oldFont = rtbOutput.Font;
+            Font oldFont = rtbOutput.Font; // (Microsoft learn, 2025b)
 
             rtbOutput.SelectionFont = new Font("Consolas", 8F, FontStyle.Regular);
             rtbOutput.AppendText(asciiArt.ShowAsciiArt() + Environment.NewLine);
@@ -119,6 +132,7 @@ namespace POE_CyberBuddy
         private async void BtnSend_Click(object sender, EventArgs e)
         {
             await inputProcessor.ProcessInput(txtInput.Text);
+            ScrollToBottom();
         }
 
         private void BtnCommands_Click(object sender, EventArgs e)
@@ -145,13 +159,14 @@ namespace POE_CyberBuddy
         {
             rtbOutput.SelectionStart = rtbOutput.Text.Length;
             rtbOutput.ScrollToCaret();
+            rtbOutput.Focus();
         }
 
         private void BtnAddTask_Click(object sender, EventArgs e)
         {
             using (var addTaskForm = new AddTaskForm())
             {
-                if (addTaskForm.ShowDialog() == DialogResult.OK)
+                if (addTaskForm.ShowDialog() == DialogResult.OK) //(Microsoft Learn, 2025)
                 {
                     // Get title and description
                     string title = addTaskForm.TaskTitle.Trim();
@@ -169,7 +184,7 @@ namespace POE_CyberBuddy
                         {
                             using (var reminderForm = new SetReminderForm())
                             {
-                                if (reminderForm.ShowDialog() == DialogResult.OK && reminderForm.Days > 0)
+                                if (reminderForm.ShowDialog() == DialogResult.OK && reminderForm.Days > 0) //(Microsoft Learn, 2025)
                                 {
                                     // Add task with reminder
                                     taskManager.AddTask(title, description, DateTime.Now.AddDays(reminderForm.Days));
@@ -220,13 +235,30 @@ namespace POE_CyberBuddy
         private async void btnStartQuiz_Click(object sender, EventArgs e)
         {
             await quizHandler.StartQuiz(userName);
+            ScrollToBottom();
         }
 
         private void btnActivityLog_Click(object sender, EventArgs e)
         {
             var log = conversationPart2.ShowActivityLog();
             rtbOutput.AppendText(log + Environment.NewLine);
+            ScrollToBottom();
         }
     }
 }
+
+/*Refrence List:
+ 
+    Microsoft Learn, 2024. .NET dependency injection. [online] Available at: 
+    https://learn.microsoft.com/en-us/dotnet/core/extensions/dependency-injection
+    (Accessed: 25 June 2025).
+
+    Microsoft Learn, 2025. Form.ShowDialog Method. [online] Available at: 
+    https://learn.microsoft.com/en-us/dotnet/api/system.windows.forms.form.showdialog?view=windowsdesktop-9.0
+    (Accessed: 23 June 2025).
+
+    Microsoft Learn, 2025b. RichTextBox Class. [online] Available at:
+    https://learn.microsoft.com/en-us/dotnet/api/system.windows.forms.richtextbox?view=windowsdesktop-9.0
+    (Accessed 22 June 2025).
+ */
 

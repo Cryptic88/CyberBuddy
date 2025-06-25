@@ -136,7 +136,7 @@ namespace POE_Cybersecurity_Chatbot
         {
             var matchSetReminder = Regex.Match(userInput,
                 @"set reminder for (?<title>.+) in (?<days>\d+) days?",
-                RegexOptions.IgnoreCase);
+                RegexOptions.IgnoreCase); // (Microsoft Learn, 2025)
 
             if (matchSetReminder.Success)
             {
@@ -173,7 +173,7 @@ namespace POE_Cybersecurity_Chatbot
             {
                 var matchRemindMeInDays = Regex.Match(userInput,
                     @"remind me in (?<days>\d+) days?",
-                    RegexOptions.IgnoreCase);
+                    RegexOptions.IgnoreCase); // (Microsoft Learn, 2025)
 
                 if (matchRemindMeInDays.Success)
                 {
@@ -218,7 +218,7 @@ namespace POE_Cybersecurity_Chatbot
         {
             var matchWithDesc = System.Text.RegularExpressions.Regex.Match(
                 userInput,
-                @"add (a )?task (to )?(?<title>.*?) with description (?<description>.+)",
+                @"add (a )?task (to )?(?<title>.*?) with description (?<description>.+)", // (Microsoft Learn, 2025)
                 System.Text.RegularExpressions.RegexOptions.IgnoreCase
             );
 
@@ -234,8 +234,8 @@ namespace POE_Cybersecurity_Chatbot
                 return $"Cyber Buddy: Task \"{taskTitle}\" added with description \"{description}\".\n" +
                        "If you’d like to set a reminder, just say \"Remind me on '2025-01-01'\".";
             }
-            var match = System.Text.RegularExpressions.Regex.Match(userInput, @"add (a )?task (to )?(.+)");
-            if (!match.Success) match = System.Text.RegularExpressions.Regex.Match(userInput, @"set (a )?task (to )?(.+)");
+            var match = System.Text.RegularExpressions.Regex.Match(userInput, @"add (a )?task (to )?(.+)"); // (Microsoft Learn, 2025)
+            if (!match.Success) match = System.Text.RegularExpressions.Regex.Match(userInput, @"set (a )?task (to )?(.+)");  // (Microsoft Learn, 2025)
 
             if (match.Success)
             {
@@ -316,3 +316,11 @@ namespace POE_Cybersecurity_Chatbot
         }
     }
 }
+
+/*Refrence List:
+    
+    Microsoft Learn, 2025. Regex.Match Method. [online] Available at: 
+    https://learn.microsoft.com/en-us/dotnet/api/system.text.regularexpressions.regex.match?view=net-9.0
+    (Accessed: 23 June 2025).
+ 
+ */

@@ -17,8 +17,8 @@ namespace POE_CyberBuddy
         {
             var reminderText = ReminderDate.HasValue
                 ? $" (Reminder: {ReminderDate.Value.ToShortDateString()})"
-                : "";
-            var status = IsCompleted ? "[Completed]" : "[Pending]";
+                : ""; // (Microsoft Learn, 2023)
+            var status = IsCompleted ? "[Completed]" : "[Pending]"; // (Microsoft Learn, 2023)
             return $"{status} {Title} - {Description}{reminderText}";
         }
     }
@@ -61,3 +61,11 @@ namespace POE_CyberBuddy
         }
     }
 }
+
+/*Refrence List:
+    
+    Microsoft Learn, 2023. ?: operator - the ternary conditional operator. [online] Available at: 
+    https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/operators/conditional-operator
+    (Accessed: 22 June 2025).
+ 
+ */

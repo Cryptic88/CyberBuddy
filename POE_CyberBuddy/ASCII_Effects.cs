@@ -79,7 +79,7 @@ public string ShowAsciiArtForTopic(string topic)
             | |  | |_| | |_) | | | (__  \  /\  / | | | |
             \_|   \__,_|_.__/|_|_|\___|  \/  \/|_|_| |_|    
             
-            ";
+            "; // (patorjk, 2025)
 
         case var t when t.Contains("firewall"):
             return @"
@@ -93,7 +93,7 @@ public string ShowAsciiArtForTopic(string topic)
             | __| | ||   / _| \ \/\/ / / _ \ | |__| |__  
             |_|  |___|_|_\___| \_/\_/ /_/ \_\|____|____|    
             
-            ";
+            "; // (patorjk, 2025)
 
         case var t when t.Contains("usb"):
             return @"
@@ -102,9 +102,9 @@ public string ShowAsciiArtForTopic(string topic)
             |     | |______ |_____]      |     \ |_____/   |    \  /  |______ |______
             |_____| ______| |_____]      |_____/ |    \_ __|__   \/   |______ ______|
             
-            ";
+            "; // (patorjk, 2025)
 
-        case var t when t.Contains("social engineering"):
+                case var t when t.Contains("social engineering"):
             return @"
 
                _____            _       __   ______            _                     
@@ -113,9 +113,9 @@ public string ShowAsciiArtForTopic(string topic)
              ___/ / /_/ / /__/ / /_/ / /  / /___/ / / / /_/ / / / / /  __/  __/ /    
             /____/\____/\___/_/\__,_/_/  /_____/_/ /_/\__, /_/_/ /_/\___/\___/_/     
                                                      /____/                         
-            ";
+            "; // (patorjk, 2025)
 
-        case var t when t.Contains("phishing"):
+                case var t when t.Contains("phishing"):
             return @"
 
                ___ _     _     _     _             
@@ -124,9 +124,9 @@ public string ShowAsciiArtForTopic(string topic)
             / ___/| | | | \__ \ | | | | | | | (_| |
             \/    |_| |_|_|___/_| |_|_|_| |_|\__, |
                                              |___/
-            ";
+            "; // (patorjk, 2025)
 
-        case var t when t.Contains("password"):
+                case var t when t.Contains("password"):
             return @"
 
               _____                                    _     
@@ -136,9 +136,9 @@ public string ShowAsciiArtForTopic(string topic)
              | |  | (_| \__ \__ \\ V  V / (_) | | | (_| \__ \
              |_|   \__,_|___/___/ \_/\_/ \___/|_|  \__,_|___/
             
-            ";
+            "; // (patorjk, 2025)
 
-        case var t when t.Contains("browse"):
+                case var t when t.Contains("browse"):
             return @"
 
                 ____                                  _____       ____     __     
@@ -147,9 +147,9 @@ public string ShowAsciiArtForTopic(string topic)
              / /_/ / /  / /_/ / |/ |/ (__  )  __/   ___/ / /_/ / __/  __/ / /_/ / 
             /_____/_/   \____/|__/|__/____/\___/   /____/\__,_/_/  \___/_/\__, /  
                                                                          /____/  
-            ";
+            "; // (patorjk, 2025)
 
-        default:
+                default:
             return ""; // No special art
     }
 }
@@ -165,7 +165,4 @@ public string ShowAsciiArtForTopic(string topic)
   stackoverflow, 2016. c# how to make loading text simple. [online] Available at:
   https://stackoverflow.com/questions/39694698/c-sharp-how-to-make-loading-text-simple
   [Accessed 11 April 2025].
- 
-  stackoverflow, 2012. Wrap text to the next line when it exceeds a certain length?. [online] Available at:
-  https://stackoverflow.com/questions/10541124/wrap-text-to-the-next-line-when-it-exceeds-a-certain-length
-  [Accessed 11 April 2025].*/
+ */

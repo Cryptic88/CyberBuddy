@@ -9,10 +9,11 @@ namespace POE_CyberBuddy
     public class QuizHandler
     {
         private readonly QuizManager _quizManager;
-        private readonly Action<string> _appendText;
-        private readonly Func<string, Task> _speakAsync;
-        private readonly Action _scrollToBottom;
+        private readonly Action<string> _appendText; 
+        private readonly Func<string, Task> _speakAsync; 
+        private readonly Action _scrollToBottom; 
         private readonly Action<string> _logAction;
+        // (Tobby, 2023)
 
         public bool IsInQuiz { get; private set; }
 
@@ -22,6 +23,7 @@ namespace POE_CyberBuddy
             Func<string, Task> speakAsync,
             Action scrollToBottom,
             Action<string> logAction)
+            // (Tobby, 2023)
         {
             _quizManager = quizManager;
             _appendText = appendText;
@@ -44,11 +46,11 @@ namespace POE_CyberBuddy
             if (userChoice != -1)
             {
                 bool isCorrect = _quizManager.CheckAnswer(userChoice, out var explanation);
-                _logAction($"User answered question {_quizManager.GetCurrentQuestionNumber()} with option {(char)('A' + userChoice)} - {(isCorrect ? "Correct" : "Incorrect")}");
+                _logAction($"User answered question {_quizManager.GetCurrentQuestionNumber()} with option {(char)('A' + userChoice)} - {(isCorrect ? "Correct" : "Incorrect")}"); // (Microsoft Learn, 2023)
 
                 var resultText = isCorrect
                     ? $"Cyber Buddy: Correct! {explanation}"
-                    : $"Cyber Buddy: Incorrect. {explanation}";
+                    : $"Cyber Buddy: Incorrect. {explanation}"; // (Microsoft Learn, 2023)
 
                 _appendText(resultText + Environment.NewLine);
                 await _speakAsync(resultText);
@@ -118,4 +120,14 @@ namespace POE_CyberBuddy
         }
     }
 }
+/*Refrence List:
+    
+    Tobby, U, 2023. Action and Func Delegates in C# – Explained with Examples. [online] Available at: 
+    https://www.freecodecamp.org/news/action-and-func-delegates-in-c-sharp/
+    (Accessed: 25 June 2025).
+ 
+    Microsoft Learn, 2023. ?: operator - the ternary conditional operator. [online] Available at: 
+    https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/operators/conditional-operator
+    (Accessed: 25 June 2025).
+ */
 

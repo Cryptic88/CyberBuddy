@@ -23,10 +23,8 @@ namespace POE_CyberBuddy
         private readonly Action<string> AppendTextToOutput;
         private readonly Action AppendScrollToBottom;
         private readonly Action ClearInput;
-        private readonly Func<bool> IsInQuiz;
-        private readonly Action<string> HandleQuizResponse;
         private readonly Func<string, string, string?> HandleNLPInput;
-
+        // (Tobby, 2023)
 
         private string currentTopic = "";
 
@@ -45,6 +43,7 @@ namespace POE_CyberBuddy
             Func<bool> isInQuiz,
             Action<string> handleQuizResponse,
             Func<string, string, string?> handleNLPInput)
+            // (Tobby, 2023)
         {
             this.conversationPart2 = conversationPart2;
             this.taskManager = taskManager;
@@ -58,12 +57,10 @@ namespace POE_CyberBuddy
             AppendTextToOutput = appendTextToOutput;
             AppendScrollToBottom = appendScrollToBottom;
             ClearInput = clearInput;
-            IsInQuiz = isInQuiz;
-            HandleQuizResponse = handleQuizResponse;
             HandleNLPInput = handleNLPInput;
         }
 
-        public async Task ProcessInput(string input)
+        public async Task ProcessInput(string input) // (Microsoft Learn, 2025)
         {
             input = input.Trim();
             if (string.IsNullOrEmpty(input))
@@ -71,7 +68,7 @@ namespace POE_CyberBuddy
 
             if (quizHandler.IsInQuiz)
             {
-                await quizHandler.HandleResponse(input);
+                await quizHandler.HandleResponse(input); // (Microsoft Learn, 2025)
                 return;
             }
 
@@ -125,7 +122,7 @@ namespace POE_CyberBuddy
 
             if (input.StartsWith("complete task", StringComparison.OrdinalIgnoreCase))
             {
-                var title = input.Substring("complete task".Length).Trim();
+                var title = input.Substring("complete task".Length).Trim();  // (Microsoft Learn, 2025b)
                 if (string.IsNullOrEmpty(title))
                 {
                     string reply = "Cyber Buddy: Please provide the title of the task you want to complete.";
@@ -258,3 +255,17 @@ namespace POE_CyberBuddy
         }
     }
 }
+/*Refrence List:
+    
+    Tobby, U, 2023. Action and Func Delegates in C# – Explained with Examples. [online] Available at: 
+    https://www.freecodecamp.org/news/action-and-func-delegates-in-c-sharp/
+    (Accessed: 25 June 2025).
+ 
+    Microsoft Learn, 2025. Asynchronous programming scenarios. [online] Available at: 
+    https://learn.microsoft.com/en-us/dotnet/csharp/asynchronous-programming/async-scenarios
+    (Accessed: 25 June 2025).
+
+    Microsoft Learn, 2025. String.Substring Method. [online] Available at: 
+    https://learn.microsoft.com/en-us/dotnet/api/system.string.substring?view=net-9.0
+    (Accessed: 23 June 2025).
+ */
