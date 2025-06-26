@@ -129,7 +129,7 @@ namespace POE_CyberBuddy
             rtbOutput.AppendText(chatbot.ShowWelcomeMessage(userName) + Environment.NewLine);
             ScrollToBottom();
 
-            reminderTimer = new System.Windows.Forms.Timer();
+            reminderTimer = new System.Windows.Forms.Timer(); // (Microsoft Learn, 2025c)
             reminderTimer.Interval = 60000; // Check every 60 seconds
             reminderTimer.Tick += ReminderTimer_Tick;
             reminderTimer.Start();
@@ -237,7 +237,7 @@ namespace POE_CyberBuddy
                 }
             }
         }
-        private void ReminderTimer_Tick(object sender, EventArgs e)
+        private void ReminderTimer_Tick(object sender, EventArgs e) // (Microsoft Learn, 2025c)
         {
             var tasks = taskManager.GetAllTasks();
             var dueTasks = tasks
