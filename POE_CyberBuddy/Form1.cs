@@ -11,6 +11,7 @@ namespace POE_CyberBuddy
 {
     public partial class Form1 : Form
     {
+        private System.Windows.Forms.Timer reminderTimer;
         private Conversation chatbot = new Conversation();
         private ConversationPart2 conversationPart2;
         private InputProcessor inputProcessor;
@@ -127,6 +128,11 @@ namespace POE_CyberBuddy
 
             rtbOutput.AppendText(chatbot.ShowWelcomeMessage(userName) + Environment.NewLine);
             ScrollToBottom();
+
+            reminderTimer = new System.Windows.Forms.Timer();
+            reminderTimer.Interval = 60000; // Check every 60 seconds
+            reminderTimer.Tick += ReminderTimer_Tick;
+            reminderTimer.Start();
         }
 
         private async void BtnSend_Click(object sender, EventArgs e)
@@ -231,7 +237,22 @@ namespace POE_CyberBuddy
                 }
             }
         }
+        private void ReminderTimer_Tick(object sender, EventArgs e)
+        {
+            var tasks = taskManager.GetAllTasks();
+            var dueTasks = tasks
+                .Where(t => !t.IsCompleted && t.ReminderDate.HasValue && t.ReminderDate.Value.Date <= DateTime.Now.Date)
+                .ToList();
 
+            foreach (var dueTask in dueTasks)
+            {
+                // Show alert
+                MessageBox.Show($"Reminder!\nTask \"{dueTask.Title}\" is due.\n{dueTask.Description}",
+                                "Task Reminder",
+                                MessageBoxButtons.OK,
+                                MessageBoxIcon.Information);
+            }
+        }
         private async void btnStartQuiz_Click(object sender, EventArgs e)
         {
             await quizHandler.StartQuiz(userName);
@@ -260,5 +281,9 @@ namespace POE_CyberBuddy
     Microsoft Learn, 2025b. RichTextBox Class. [online] Available at:
     https://learn.microsoft.com/en-us/dotnet/api/system.windows.forms.richtextbox?view=windowsdesktop-9.0
     (Accessed 22 June 2025).
+
+    Microsoft Learn, 2025c. How to: Run Procedures at Set Intervals with the Windows Forms Timer Component. [online] Available at:
+    https://learn.microsoft.com/en-us/dotnet/desktop/winforms/controls/run-procedures-at-set-intervals-with-wf-timer-component
+    (Accessed 26 June 2025).
  */
 
