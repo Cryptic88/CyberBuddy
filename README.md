@@ -17,7 +17,7 @@ Cyber Buddy is a C# console and Windows Forms application designed as a cybersec
 
 Watch the project in action:
 
-[![Cyber Buddy Demo Video]](https://youtu.be/aj8iLv2e8CE)
+[![Cyber Buddy Demo](https://img.youtube.com/vi/aj8iLv2e8CE/0.jpg)](https://youtu.be/aj8iLv2e8CE)
 
 ## Getting Started
 ### Prerequisites
